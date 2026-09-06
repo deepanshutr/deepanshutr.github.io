@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deepanshu Tripathi</title>
+<meta name="description" content="Deepanshu Tripathi. Builder at AssetMantle. One file, no dependencies, rendered live in your browser.">
+<meta name="theme-color" content="#060606">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23060606'/%3E%3Ctext x='7' y='24' font-family='monospace' font-size='22' fill='%23e8e8e8'%3E%23%3C/text%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #060606;
+  --ink: #e8e8e8;
+  --dim: #9a9a9a;
+  --faint: #383838;
+  --line: #1c1c1c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: var(--ink); color: var(--bg); }
+a { color: inherit; text-decoration: none; }
+
+.wrap { max-width: 104ch; margin: 0 auto; padding: 0 4vw; }
+section { position: relative; padding: 14vh 0 10vh; }
+
+/* ---- rules ------------------------------------------------------------ */
+pre.rule {
+  font: inherit;
+  white-space: pre;
+  overflow: hidden;
+  color: var(--faint);
+  user-select: none;
+  margin: 0;
+}
+pre.rule .lbl { color: var(--dim); }
+pre.rule.l1 { color: var(--dim); }
+pre.rule.l1 .lbl { color: var(--ink); }
+
+/* ---- boot overlay ------------------------------------------------------ */
+#boot {
+  position: fixed; inset: 0; z-index: 60;
+  background: var(--bg);
+  padding: 8vh 6vw;
+  font-size: 14px;
+  transition: transform .55s cubic-bezier(.7, 0, .2, 1);
+}
+#boot.done { transform: translateY(-101%); }
+#boot .bline { display: block; opacity: 0; }
+#boot .bline.on { opacity: 1; }
+
+/* ---- hero -------------------------------------------------------------- */
+#hero { height: 100svh; min-height: 560px; padding: 0; }
+#field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero-meta {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 0 4vw 4.5vh;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 2ch; flex-wrap: wrap;
+}
+.typedline { font-size: clamp(14px, 2.2vw, 20px); letter-spacing: .04em; }
+.typedline .cur { display: inline-block; width: .62ch; background: var(--ink); color: var(--ink); }
+.typedline .cur.blink { animation: blink 1.05s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.hero-side { color: var(--dim); font-size: 13px; text-align: right; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---- status bar --------------------------------------------------------- */
+#statusbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  display: flex; justify-content: space-between;
+  padding: .45em 1.2ch;
+  font-size: 12px; color: var(--dim);
+  background: linear-gradient(transparent, rgba(6,6,6,.88) 45%);
+  pointer-events: none;
+}
+
+/* ---- generic section content ------------------------------------------- */
+.tok { color: var(--dim); }
+p.lede { max-width: 64ch; color: var(--dim); margin: 3.2em 0 0; }
+p.lede b, p.lede strong { color: var(--ink); font-weight: 700; }
+p.body { max-width: 64ch; color: var(--dim); margin-top: 1.4em; }
+p.body a { color: var(--ink); border-bottom: 1px dotted var(--faint); }
+p.body a:hover { background: var(--ink); color: var(--bg); border-bottom-color: var(--ink); }
+
+section .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+section.on .reveal { opacity: 1; transform: none; }
+section.on .reveal.d1 { transition-delay: .08s; }
+section.on .reveal.d2 { transition-delay: .16s; }
+section.on .reveal.d3 { transition-delay: .24s; }
+
+/* ---- index rows ---------------------------------------------------------- */
+.rows { margin-top: 3em; border-top: 1px solid var(--line); }
+.row {
+  display: grid;
+  grid-template-columns: 4ch minmax(16ch, 1fr) 2fr 4ch;
+  gap: 2ch; align-items: baseline;
+  padding: .9em 1ch;
+  border-bottom: 1px solid var(--line);
+  transition: background .12s ease, color .12s ease;
+}
+.row .n { color: var(--dim); }
+.row .name { color: var(--ink); }
+.row .desc { color: var(--dim); }
+.row .arr { color: var(--dim); text-align: right; }
+a.row:hover { background: var(--ink); }
+a.row:hover, a.row:hover .n, a.row:hover .name, a.row:hover .desc, a.row:hover .arr { color: var(--bg); }
+
+/* ---- works rows ---------------------------------------------------------- */
+a.wrow {
+  display: grid;
+  grid-template-columns: 11ch minmax(30ch, 1.2fr) 1.6fr 4ch;
+  gap: 2ch; align-items: baseline;
+  padding: .95em 1ch;
+  border-bottom: 1px solid var(--line);
+  transition: background .12s ease, color .12s ease;
+}
+a.wrow .perm { color: var(--faint); }
+a.wrow .name { color: var(--ink); }
+a.wrow .desc { color: var(--dim); }
+a.wrow .arr { color: var(--dim); text-align: right; }
+a.wrow:hover { background: var(--ink); }
+a.wrow:hover, a.wrow:hover .perm, a.wrow:hover .name, a.wrow:hover .desc, a.wrow:hover .arr { color: var(--bg); }
+
+/* ---- signal rows ---------------------------------------------------------- */
+a.srow {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 2ch;
+  padding: 1.15em 1ch;
+  border-bottom: 1px solid var(--line);
+  font-size: clamp(16px, 2.6vw, 24px);
+  transition: background .12s ease, color .12s ease;
+}
+a.srow .tok { font-size: .7em; }
+a.srow .arr { color: var(--dim); }
+a.srow:hover { background: var(--ink); }
+a.srow:hover, a.srow:hover .tok, a.srow:hover .arr { color: var(--bg); }
+
+/* ---- footer ---------------------------------------------------------------- */
+footer { padding: 10vh 0 16vh; color: var(--dim); font-size: 13px; }
+footer .cols { display: flex; justify-content: space-between; gap: 3ch; flex-wrap: wrap; margin-top: 2.4em; }
+@media (min-width: 701px) { footer .cols { flex-wrap: nowrap; } }
+footer a { border-bottom: 1px dotted var(--faint); }
+footer a:hover { background: var(--ink); color: var(--bg); }
+
+@media (max-width: 700px) {
+  .row { grid-template-columns: 4ch 1fr 4ch; }
+  .row .desc { grid-column: 2 / 3; grid-row: 2; padding-bottom: .3em; }
+  a.wrow { grid-template-columns: 1fr 4ch; }
+  a.wrow .perm { display: none; }
+  a.wrow .desc { grid-column: 1 / 2; grid-row: 2; padding-bottom: .3em; }
+  .hero-side { text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  section .reveal { opacity: 1; transform: none; transition: none; }
+  .typedline .cur.blink { animation: none; }
+  #boot { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="boot" aria-hidden="true">
+  <span class="bline">[OK] identity: deepanshu tripathi</span>
+  <span class="bline" id="boot-field">[OK] field: warming up</span>
+  <span class="bline">[ii] location: metaverse</span>
+  <span class="bline">[&gt;&gt;] scroll</span>
+</div>
+
+<section id="hero" aria-label="Deepanshu Tripathi">
+  <canvas id="field" aria-hidden="true"></canvas>
+  <h1 class="sr-only">Deepanshu Tripathi</h1>
+  <div class="hero-meta">
+    <div class="typedline"><span id="typed"></span><span class="cur" id="cur">&nbsp;</span></div>
+    <div class="hero-side">location: metaverse<br>[..] scroll</div>
+  </div>
+</section>
+
+<div id="statusbar"><span id="sb-left">[..] boot</span><span id="sb-right"></span></div>
+
+<main>
+
+<section id="index" aria-label="Index">
+  <div class="wrap">
+    <pre class="rule l1" data-l1="INDEX"></pre>
+    <nav class="rows">
+      <a class="row reveal" href="#assetmantle"><span class="n">01</span><span class="name">/assetmantle</span><span class="desc">the framework he founded</span><span class="arr">-&gt;</span></a>
+      <a class="row reveal d1" href="#path"><span class="n">02</span><span class="name">/path</span><span class="desc">how he got here</span><span class="arr">-&gt;</span></a>
+      <a class="row reveal d2" href="#works"><span class="n">03</span><span class="name">/works</span><span class="desc">open code, home lab, physics</span><span class="arr">-&gt;</span></a>
+      <a class="row reveal d2" href="#output"><span class="n">04</span><span class="name">/output</span><span class="desc">writing, interviews, talks</span><span class="arr">-&gt;</span></a>
+      <a class="row reveal d3" href="#signal"><span class="n">05</span><span class="name">/signal</span><span class="desc">where to find him</span><span class="arr">-&gt;</span></a>
+    </nav>
+  </div>
+</section>
+
+<section id="assetmantle" aria-label="AssetMantle">
+  <div class="wrap">
+    <pre class="rule l1" data-l1="ASSETMANTLE"></pre>
+    <p class="lede reveal"><b>AssetMantle</b> is a framework that lets creators and brands run their own marketplaces for non-fungible tokens (NFTs - unique digital assets recorded on a blockchain). Its mainnet went live in April 2022, built with Cosmos tooling so its assets can move between chains.</p>
+    <p class="body reveal d1">Deepanshu founded AssetMantle and leads product and growth. Earlier he led development of interNFT, the shared standard that lets NFTs work across blockchains, and was a key contributor to pSTAKE. Code lives at <a href="https://github.com/AssetMantle">github.com/AssetMantle</a>, product at <a href="https://assetmantle.one">assetmantle.one</a>.</p>
+  </div>
+</section>
+
+<section id="path" aria-label="Path">
+  <div class="wrap">
+    <pre class="rule l1" data-l1="PATH"></pre>
+    <div class="rows">
+      <div class="row reveal"><span class="n">2017</span><span class="name">moves into blockchain</span><span class="desc">from traditional financial technology</span><span class="arr"></span></div>
+      <div class="row reveal d1"><span class="n">2018</span><span class="name">comdex</span><span class="desc">principal software architect, early core contributor</span><span class="arr"></span></div>
+      <div class="row reveal d2"><span class="n">2019</span><span class="name">persistence</span><span class="desc">co-founder, chief technology officer</span><span class="arr"></span></div>
+      <div class="row reveal d3"><span class="n">2022</span><span class="name">assetmantle mainnet</span><span class="desc">april 18, founder and product growth lead</span><span class="arr"></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="works" aria-label="Works">
+  <div class="wrap">
+    <pre class="rule l1" data-l1="WORKS"></pre>
+    <div class="rows">
+      <a class="wrow reveal" href="https://github.com/deepanshutr/philosophical-unification-of-all-forces"><span class="perm">-rw-r--r--</span><span class="name">philosophical-unification-of-all-forces</span><span class="desc">open notebook on unifying the fundamental forces</span><span class="arr">-&gt;</span></a>
+      <a class="wrow reveal" href="https://github.com/deepanshutr/mantle-osmo-hermes-relayer"><span class="perm">-rw-r--r--</span><span class="name">mantle-osmo-hermes-relayer</span><span class="desc">keeps two blockchains talking, mantle-1 to osmosis-1</span><span class="arr">-&gt;</span></a>
+      <a class="wrow reveal d1" href="https://github.com/deepanshutr/assetmantle-rpc-radar"><span class="perm">-rw-r--r--</span><span class="name">assetmantle-rpc-radar</span><span class="desc">health watcher for every AssetMantle endpoint</span><span class="arr">-&gt;</span></a>
+      <a class="wrow reveal d1" href="https://github.com/deepanshutr/esptouch"><span class="perm">-rw-r--r--</span><span class="name">esptouch</span><span class="desc">clean-room wifi provisioning library for Espressif chips</span><span class="arr">-&gt;</span></a>
+      <a class="wrow reveal d2" href="https://github.com/deepanshutr/orchctl"><span class="perm">-rw-r--r--</span><span class="name">orchctl</span><span class="desc">registry and drift checker for a fleet of devices</span><span class="arr">-&gt;</span></a>
+      <a class="wrow reveal d2" href="https://github.com/deepanshutr/lgtv-cli"><span class="perm">-rw-r--r--</span><span class="name">lgtv-cli</span><span class="desc">drives an LG webOS television from the terminal</span><span class="arr">-&gt;</span></a>
+      <a class="wrow reveal d3" href="https://github.com/deepanshutr/bulb-cli"><span class="perm">-rw-r--r--</span><span class="name">bulb-cli</span><span class="desc">one command line for every smart bulb protocol</span><span class="arr">-&gt;</span></a>
+    </div>
+  </div>
+</section>
+
+<section id="output" aria-label="Output">
+  <div class="wrap">
+    <pre class="rule l1" data-l1="OUTPUT"></pre>
+    <div class="rows">
+      <a class="row reveal" href="https://www.nasdaq.com/articles/centralization-is-crippling-the-industry-needs-decentralized-nft-marketplaces"><span class="n">01</span><span class="name">nasdaq.com</span><span class="desc">op-ed: centralization is crippling, the case for decentralized nft marketplaces</span><span class="arr">-&gt;</span></a>
+      <a class="row reveal" href="https://techbullion.com/talking-nfts-with-assetmantle-founder-deepanshu-tripathi/"><span class="n">02</span><span class="name">techbullion</span><span class="desc">interview: talking nfts, 2022</span><span class="arr">-&gt;</span></a>
+      <a class="row reveal d1" href="https://www.podcast24.fi/episodes/crypto-current/deepanshu-tripathi-on-enhancing-the-nft-buying-experience-with-assetmantle-R9Fj9dbQPN"><span class="n">03</span><span class="name">crypto current 282</span><span class="desc">podcast: enhancing the nft buying experience, 2022</span><span class="arr">-&gt;</span></a>
+      <a class="row reveal d2" href="https://www.jiosaavn.com/shows/deepanshu-tripathi-build-your-custom-nft-marketplace-%7C-ep-025/-GZD8oAogCg_"><span class="n">04</span><span class="name">metaroy 025</span><span class="desc">podcast: build your custom nft marketplace, 2022</span><span class="arr">-&gt;</span></a>
+      <a class="row reveal d3" href="https://terraspaces.org/2023/02/22/frontier-wallet-x-assetmantle-ama/"><span class="n">05</span><span class="name">frontier wallet</span><span class="desc">ask-me-anything with assetmantle, 2023</span><span class="arr">-&gt;</span></a>
+    </div>
+  </div>
+</section>
+
+<section id="signal" aria-label="Signal">
+  <div class="wrap">
+    <pre class="rule l1" data-l1="SIGNAL"></pre>
+    <div class="rows">
+      <a class="srow reveal" href="https://github.com/deepanshutr"><span><span class="tok">[&gt;&gt;] </span>github.com/deepanshutr</span><span class="arr">-&gt;</span></a>
+      <a class="srow reveal d1" href="https://x.com/deepanshutr"><span><span class="tok">[&gt;&gt;] </span>x.com/deepanshutr</span><span class="arr">-&gt;</span></a>
+      <a class="srow reveal d2" href="https://www.linkedin.com/in/deepanshutr"><span><span class="tok">[&gt;&gt;] </span>linkedin.com/in/deepanshutr</span><span class="arr">-&gt;</span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer id="colophon">
+  <div class="wrap">
+    <pre class="rule l3" data-l3></pre>
+    <div class="cols">
+      <div>one file. no dependencies.<br>no trackers, no cookies.</div>
+      <div>typeface: your system monospace.<br>palette: greyscale, like your terminal.</div>
+      <div>keys: j/k move, t top.<br>&copy; 2026 deepanshu tripathi</div>
+    </div>
+    <p style="margin-top:2.4em">[OK] end of transmission</p>
+  </div>
+</footer>
+<script>
+(() => {
+"use strict";
+
+const params = new URLSearchParams(location.search);
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const flat = params.has("flat") || reduced;
+const mono = getComputedStyle(document.body).fontFamily;
+
+addEventListener("error", e => { document.documentElement.dataset.jserror = String(e.message || "err"); });
+
+/* ================= rules ================= */
+
+let measureCx = null;
+function chWidth(el) {
+  if (!measureCx) measureCx = document.createElement("canvas").getContext("2d");
+  measureCx.font = getComputedStyle(el).fontSize + " " + mono;
+  return measureCx.measureText("M").width || 8;
+}
+function buildRules() {
+  document.querySelectorAll("pre.rule").forEach(el => {
+    const w = el.clientWidth;
+    if (!w) return;
+    const n = Math.max(16, Math.floor(w / chWidth(el)));
+    if (el.dataset.l1 !== undefined) {
+      const line = "=".repeat(n);
+      el.innerHTML = line + "\n  <span class=\"lbl\">" + el.dataset.l1 + "</span>\n" + line;
+    } else if (el.dataset.l3 !== undefined) {
+      el.textContent = ". ".repeat(Math.floor(n / 2)).trim();
+    } else {
+      el.textContent = "-".repeat(n);
+    }
+  });
+}
+
+/* ================= hero field ================= */
+
+const cv = document.getElementById("field");
+const cx = cv.getContext("2d");
+const hero = document.getElementById("hero");
+const CHARS = " .:-=+*#%@";
+
+let W = 0, H = 0, cell = 13;
+let parts = [], targets = [];
+const pointer = { x: -1e4, y: -1e4, on: false };
+
+function sizeCanvas() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = Math.round(W * dpr);
+  cv.height = Math.round(H * dpr);
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.textAlign = "center";
+  cx.textBaseline = "middle";
+}
+
+function sampleTargets() {
+  cell = W < 700 ? 6 : 12;
+  const off = document.createElement("canvas");
+  off.width = W; off.height = H;
+  const o = off.getContext("2d", { willReadFrequently: true });
+  const size = Math.max(44, Math.floor(Math.min(W / 5.8, H / 4.3)));
+  o.fillStyle = "#fff";
+  o.font = "700 " + size + "px " + mono;
+  o.textAlign = "center";
+  o.textBaseline = "middle";
+  const cy = H * 0.42;
+  o.fillText("DEEPANSHU", W / 2, cy - size * 0.60);
+  o.fillText("TRIPATHI", W / 2, cy + size * 0.60);
+  const img = o.getImageData(0, 0, W, H).data;
+  targets = [];
+  for (let y = (cell / 2) | 0; y < H; y += cell)
+    for (let x = (cell / 2) | 0; x < W; x += cell)
+      if (img[((y * W + x) * 4) + 3] > 110) targets.push([x, y]);
+}
+
+function targetFor(i, count) {
+  return targets[Math.floor(i * targets.length / count) % targets.length];
+}
+
+function buildParts() {
+  if (!targets.length) return 0;
+  const budget = W < 700 ? 1600 : 3200;
+  const P = Math.max(300, Math.min(budget, targets.length || 1));
+  parts = [];
+  for (let i = 0; i < P; i++) {
+    const t = targetFor(i, P);
+    parts.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 9, vy: (Math.random() - 0.5) * 9,
+      tx: t[0], ty: t[1],
+      c: CHARS[2 + (i % (CHARS.length - 3))]
+    });
+  }
+  return P;
+}
+
+function reassign() {
+  if (!targets.length) return;
+  for (let i = 0; i < parts.length; i++) {
+    const t = targetFor(i, parts.length);
+    parts[i].tx = t[0]; parts[i].ty = t[1];
+  }
+}
+
+function drawStatic() {
+  cx.clearRect(0, 0, W, H);
+  cx.font = cell + "px " + mono;
+  cx.fillStyle = "#e8e8e8";
+  for (const t of targets) {
+    cx.globalAlpha = 0.92;
+    cx.fillText("#", t[0], t[1]);
+  }
+  cx.globalAlpha = 1;
+}
+
+let raf = 0, running = false, inView = true;
+
+function tick() {
+  const p = Math.min(1, Math.max(0, scrollY / (H * 0.85)));
+  const k = 0.052 * (1 - p * 0.9);
+  const damp = 0.88;
+  cx.clearRect(0, 0, W, H);
+  cx.font = cell + "px " + mono;
+  cx.fillStyle = "#e8e8e8";
+  for (let i = 0; i < parts.length; i++) {
+    const pt = parts[i];
+    pt.vx += (pt.tx - pt.x) * k + (Math.random() - 0.5) * 0.16;
+    pt.vy += (pt.ty - pt.y) * k + (Math.random() - 0.5) * 0.16 - p * 0.8;
+    if (pointer.on) {
+      const dx = pt.x - pointer.x, dy = pt.y - pointer.y;
+      const d2 = dx * dx + dy * dy, R = 130;
+      if (d2 < R * R && d2 > 0.01) {
+        const d = Math.sqrt(d2), f = (1 - d / R) * 2.4;
+        pt.vx += dx / d * f; pt.vy += dy / d * f;
+      }
+    }
+    pt.vx *= damp; pt.vy *= damp;
+    pt.x += pt.vx; pt.y += pt.vy;
+    const dx2 = pt.tx - pt.x, dy2 = pt.ty - pt.y;
+    const d = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+    let a, ch;
+    if (d < 3)      { a = 0.96; ch = "#"; }
+    else if (d < 9) { a = 0.85; ch = "*"; }
+    else if (d < 24) { a = 0.60; ch = "+"; }
+    else if (d < 60) { a = 0.38; ch = ":"; }
+    else            { a = 0.20; ch = "."; }
+    a *= (1 - p * 0.8);
+    if (a < 0.03) continue;
+    cx.globalAlpha = a;
+    cx.fillText(ch, pt.x, pt.y);
+  }
+  cx.globalAlpha = 1;
+  if (inView && !document.hidden) raf = requestAnimationFrame(tick);
+  else running = false;
+}
+
+function start() {
+  if (running || flat) return;
+  running = true;
+  raf = requestAnimationFrame(tick);
+}
+function stop() {
+  running = false;
+  cancelAnimationFrame(raf);
+}
+
+hero.addEventListener("pointermove", e => {
+  const r = cv.getBoundingClientRect();
+  pointer.x = e.clientX - r.left;
+  pointer.y = e.clientY - r.top;
+  pointer.on = true;
+});
+hero.addEventListener("pointerleave", () => { pointer.on = false; });
+
+/* ================= boot ================= */
+
+const boot = document.getElementById("boot");
+
+function runBoot() {
+  if (flat) { boot.remove(); return; }
+  const lines = [...boot.querySelectorAll(".bline")];
+  lines.forEach((el, i) => setTimeout(() => el.classList.add("on"), 160 + i * 170));
+  setTimeout(() => {
+    boot.classList.add("done");
+    setTimeout(() => boot.remove(), 700);
+  }, 160 + lines.length * 170 + 480);
+}
+
+/* ================= typed line ================= */
+
+const lineText = "Builder @ AssetMantle";
+function typeLine() {
+  const el = document.getElementById("typed");
+  const cur = document.getElementById("cur");
+  if (flat) { el.textContent = lineText; cur.classList.add("blink"); return; }
+  let i = 0;
+  (function step() {
+    el.textContent = lineText.slice(0, ++i);
+    if (i < lineText.length) setTimeout(step, 40 + Math.random() * 45);
+    else cur.classList.add("blink");
+  })();
+}
+
+/* ================= status bar + reveals ================= */
+
+const sbLeft = document.getElementById("sb-left");
+const sbRight = document.getElementById("sb-right");
+
+function clock() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  sbRight.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+}
+
+function updateStatus() {
+  const y = scrollY + innerHeight * 0.35;
+  let cur = IDS[0];
+  for (const id of IDS) {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= y) cur = id;
+  }
+  sbLeft.textContent = (cur === "hero" ? "[..] /" : "[ii] /") + cur;
+}
+
+function observe() {
+  const io = new IntersectionObserver(entries => {
+    for (const en of entries) {
+      if (en.target.id === "hero") {
+        inView = en.isIntersecting;
+        if (inView) start(); else stop();
+      }
+      if (en.isIntersecting) en.target.classList.add("on");
+    }
+  }, { threshold: 0.18 });
+  document.querySelectorAll("#hero, main section, footer").forEach(el => io.observe(el));
+  addEventListener("scroll", updateStatus, { passive: true });
+  updateStatus();
+}
+
+/* ================= keys ================= */
+
+const IDS = ["hero", "index", "assetmantle", "path", "works", "output", "signal", "colophon"];
+addEventListener("keydown", e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target && /^(input|textarea|select)$/i.test(e.target.tagName)) return;
+  const y = scrollY + 20;
+  let cur = 0;
+  IDS.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= y) cur = i;
+  });
+  const go = i => {
+    const el = document.getElementById(IDS[Math.max(0, Math.min(IDS.length - 1, i))]);
+    if (el) el.scrollIntoView({ behavior: flat ? "auto" : "smooth" });
+  };
+  if (e.key === "j") { e.preventDefault(); go(cur + 1); }
+  else if (e.key === "k") { e.preventDefault(); go(cur - 1); }
+  else if (e.key === "t") { e.preventDefault(); scrollTo({ top: 0, behavior: flat ? "auto" : "smooth" }); }
+});
+
+/* ================= init ================= */
+
+sizeCanvas();
+buildRules();
+sampleTargets();
+const count = buildParts();
+document.getElementById("boot-field").textContent = "[OK] field: " + count + " particles";
+observe();
+clock();
+setInterval(clock, 1000);
+
+if (flat) {
+  document.documentElement.style.scrollBehavior = "auto";
+  boot.remove();
+  drawStatic();
+  typeLine();
+} else {
+  runBoot();
+  start();
+  setTimeout(typeLine, 1450);
+  const freezeAt = parseInt(params.get("freeze") || "0", 10);
+  if (freezeAt) setTimeout(stop, freezeAt);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && inView) start();
+  });
+}
+
+let rt = 0;
+addEventListener("resize", () => {
+  clearTimeout(rt);
+  rt = setTimeout(() => {
+    sizeCanvas();
+    buildRules();
+    sampleTargets();
+    if (targets.length) reassign();
+    if (flat) drawStatic();
+  }, 160);
+});
+
+})();
+</script>
+</body>
+</html>
